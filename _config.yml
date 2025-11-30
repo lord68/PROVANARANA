@@ -1,0 +1,2 @@
+# Desabilita o uso de temas, impedindo que o Jekyll procure por arquivos SCSS/SASS
+theme: null
