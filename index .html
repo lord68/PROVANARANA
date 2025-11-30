@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Morfofisiologia Celular</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .question-box {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .alternative label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        /* Estilo para a alternativa correta após a resposta */
+        .question-box.answered .alternative.is-correct label {
+            background-color: #e6ffed; /* Fundo verde claro para o gabarito */
+            border: 1px solid #c3e6cb;
+        }
+        .alternative label:hover {
+            background-color: #f0f0f0;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 30px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: block; 
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.2em;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quiz de Morfofisiologia Celular, Tecidual e do Desenvolvimento</h1>
+        
+        <div id="quiz-container">
+            </div>
+
+        <button onclick="submitQuiz()">Ver Resultado Final</button>
+
+        <div id="result-container">
+            </div>
+    </div>
+
+    <script>
+        // Gabarito baseado na análise das questões (0 = alternativa A, 1 = alternativa B, etc.)
+        const correctAnswers = [3, 3, 0, 4, 2, 1, 2, 4, 0, 0, 1, 0, 2, 3, 2];
+        const totalQuestions = correctAnswers.length;
+        
+        // Contadores globais
+        let score = 0;
+        let answeredQuestions = new Array(totalQuestions).fill(false); // Rastreia se a questão foi respondida
+
+        // Função auxiliar para converter índice (0, 1, 2...) em letra (a, b, c...)
+        function getLetter(index) {
+            return String.fromCharCode(65 + index); // 65 é o código ASCII para 'A'
+        }
+
+        const quizData = [
+            {
+                question: "Durante a respiração celular, os combustíveis biológicos são oxidados na presença de um aceptor de elétrons como o oxigênio na organela mitocôndria. A etapa da respiração celular em que há a maior produção de ATP ocorre na estrutura indicada por qual número no desenho a seguir:",
+                alternatives: [
+                    "1, que corresponde a membrana mitocondrial interna.",
+                    "2, que corresponde a membrana mitocondrial externa.",
+                    "3, que corresponde a matriz mitocondrial.",
+                    "4, que corresponde a crista mitocondrial.",
+                    "5, que corresponde a matriz mitocondrial."
+                ]
+            },
+            {
+                question: "No ducto coletor renal ocorre boa parte da reabsorção de água do filtrado para o sangue. Qual alternativa indica como ocorre processo?",
+                alternatives: [
+                    "Transporte ativo primário executado pelas aquaporinas.",
+                    "O transporte integral por difusão simples pela porção lipídica.",
+                    "Por endocitose mediada por receptores associados a vesículas.",
+                    "Transporte passivo por difusão simples feito por aquaporinas.",
+                    "Transporte passivo por difusão facilitada por canais iônicos."
+                ]
+            },
+            {
+                question: "O proteossomo é uma protease que apresenta uma conservação em eucariotos. Possivelmente o estresse oxidativo promove modificações químicas na estrutura das proteínas celulares, expondo resíduos de aminoácidos hidrofóbicos que serão reconhecidos e marcados pela ubiquitina. Se essas proteínas não forem marcadas e direcionadas para a reciclagem nos proteossomos e nem forem recuperadas pelas chaperones, pode ocorrer ______ das mesmas, formando ______. Indique qual alternativa completa corretamente as lacunas:",
+                alternatives: [
+                    "a agregação; amiloidoses.",
+                    "a solubilização; placas amiloides.",
+                    "a associação; produtos hidrolisados.",
+                    "a digestão; emaranhados proteicos.",
+                    "a hidrólise; aminoácidos livres."
+                ]
+            },
+            {
+                question: "As hemácias apresentam grande quantidade de hemoglobina (Hb), uma hemeproteína que transporta o oxigênio (O2) atmosférico até os tecidos. Um dos fatores que controla a afinidade da Hb é o 2,3 Bifosfoglicerato (2,3 - BPG). Como ocorre a interação do 2,3 BPG com a Hb e qual a sua afinidade pelo O2?",
+                alternatives: [
+                    "Liga-se ao heme diminuindo a sua afinidade pelo O2.",
+                    "Liga-se ao O2 impedindo que ele interaja com a Hb.",
+                    "Liga-se a Hb próximo aos pulmões, diminuindo a sua afinidade pelo O2.",
+                    "Liga-se a aminoácidos ácidos da Hb, diminuindo sua afinidade pelo O2.",
+                    "Liga-se a histidinas da Hb, diminuindo a afinidade pelo O2."
+                ]
+            },
+            {
+                question: "A síntese endógena de colesterol pode ser inibida pelo uso de estatina, um fármaco (medicamento) que atua como inibidor competitivo da enzima HMG-CoA redutase. Qual a atuação da estatina na cinética enzimática?",
+                alternatives: [
+                    "Diminui a velocidade máxima e aumenta o Km.",
+                    "Mantém a velocidade máxima e mantém o Km.",
+                    "Mantém a velocidade máxima e aumenta o Km.",
+                    "Aumenta a velocidade máxima e aumenta o Km.",
+                    "Diminui a velocidade máxima e mantém o Km."
+                ]
+            },
+            {
+                question: "O fibrato é um fármaco usado para controlar a dislipidemia (excesso de lipídios no sangue), a partir do aumento na produção da enzima lipase lipoprotéica capilar. Os resultados observados durante a terapia com fibrato seriam:",
+                alternatives: [
+                    "diminuição do colesterol esterificado dos quilomicrons.",
+                    "diminuição dos níveis de triglicérides totais.",
+                    "diminuição dos níveis de HDL sanguíneo.",
+                    "aumento dos níveis de HDL sanguíneo.",
+                    "aumento na quantidade de triglicérides do VLDL."
+                ]
+            },
+            {
+                question: "O programa Nacional de Suplementação de vitamina A do ministério da Saúde busca reduzir e controlar a deficiência nutricional de vitamina A em crianças de 6 a 59 meses de idade, mulheres no pós-parto imediato (antes da alta hospitalar) e residentes em regiões consideradas de risco. Dentre as funções da vitamina A é correto afirmar que:",
+                alternatives: [
+                    "Regula os níveis de cálcio no sangue, ativando a produção de um transportador no epitélio intestinal.",
+                    "Participa da produção de prolinas hidroxiladas que estão envolvidas na formação das fibras de colágeno.",
+                    "Ativam fatores de transcrição que regulam a expressão de proteínas promotoras da divisão celular.",
+                    "Está envolvida com o processo de síntese de nucleotídeos, favorecendo a fase S do ciclo celular.",
+                    "Atua como um cofator da enzima piruvato desidrogenase que possibilita a glicólise aeróbica neuronal."
+                ]
+            },
+            {
+                question: "As fibras alimentares compreendem as partes comestíveis dos vegetais que resistem ao processo de digestão, chegando inalterado ao intestino grosso. Apesar de serem carboidratos, não apresentam valor calórico ou nutritivo. Isso acontece devido a celulose apresentar:",
+                alternatives: [
+                    "uma ligação beta glicosídica não digerível por enzimas produzidas pelo nosso intestino.",
+                    "ligações alfa glicosídicas não digeríveis pelas enzimas do trato digestório.",
+                    "ligações alfa glicosídicas na configuração trans que não podem ser processadas.",
+                    "ligações alfa que foram transformadas em beta glicosídicas não hidrolisadas.",
+                    "várias ligações beta glicosídicas que não serão hidrolisadas por enzimas digestivas."
+                ]
+            },
+            {
+                question: "O escorbuto é caracterizado pelo sangramento nas mucosas, perda de dentes e demora para a cicatrização dos ferimentos. Como a avitaminose se relaciona com essa patologia?",
+                alternatives: [
+                    "Pela falha na adição de hidroxilas à prolinas, fundamentais para a formação do colágeno.",
+                    "Pelo aumento na formação de ligações covalentes entre lisinas e argininas, deixando o colágeno mais rígido.",
+                    "Por alterações na coagulação do sangue devido a diminuição na produção de protrombina no fígado.",
+                    "A partir da diminuição da produção de nucleotídeos, parando a multiplicação das células do sangue e causando anemia.",
+                    "Por alteração no processamento do pró-colágeno, diminuindo a formação das fibras de colágeno."
+                ]
+            },
+            {
+                question: "O metotrexato e a vincristina são drogas antineoplásicas que afetam fases específicas do ciclo celular. O metotrexato inibe a síntese de nucleotídeos e a vincristina inibe a polimerização dos microtúbulos. Devido a esses mecanismos de ação, o efeito antineoplásico do metotrexato e o da vincristina se devem, respectivamente:",
+                alternatives: [
+                    "ao bloqueio da fase S e à interrupção da fase M do ciclo celular.",
+                    "à promoção de apoptose e à deficiência na atuação dos microtúbulos cinetócoros.",
+                    "à interrupção da fase G2 do ciclo celular e deficiência na formação do fuso mitótico.",
+                    "à interrupção da replicação do DNA e à promoção da citocinese.",
+                    "ao bloqueio da fase G2 e à interrupção da mitose devido à deficiência de actina."
+                ]
+            },
+            {
+                question: "Considerando o ciclo celular de uma célula indiferenciada, analise as alternativas e assinale a correta.",
+                alternatives: [
+                    "A fase M do ciclo celular é responsável pela duplicação do material genético e pela separação das cromátides irmãs.",
+                    "A interfase é caracterizada pela intensa atividade metabólica da célula, incluindo replicação do DNA e transcrição de RNA.",
+                    "Durante a divisão celular, o DNA encontra-se em sua forma mais ativa, promovendo intensa transcrição de RNA para a síntese proteica.",
+                    "Os cromossomos permanecem totalmente condensados ao longo de todo o ciclo celular, garantindo a integridade das informações genéticas.",
+                    "A eucromatina, a heterocromatina e os cromossomos, embora distintos em estrutura, não compartilham os mesmos componentes moleculares."
+                ]
+            },
+            {
+                question: "Pacientes com Síndrome de Kartagener apresentam infertilidade e infecções respiratórias recorrentes devido a defeitos nos cílios móveis, que dependem de uma rede específica do citoesqueleto. Qual estrutura celular é diretamente afetada nessa condição?",
+                alternatives: [
+                    "Microtúbulos.",
+                    "Filamentos de actina.",
+                    "Filamentos intermediários.",
+                    "Microfilamentos de miosina.",
+                    "Microtubulinas de actina."
+                ]
+            },
+            {
+                question: "Os lisossomos são organelas formadas por membranas que contém uma série de enzimas digestivas capazes de quebrar todos os tipos de polímeros biológicos (proteínas, carboidratos, ácidos nucleicos e lipídios). Como os lisossomos e suas enzimas são produzidos?",
+                alternatives: [
+                    "As enzimas no complexo Golgiano; o lisossomo é montado no retículo endoplasmático liso (sob a forma de lisossomo primário).",
+                    "As enzimas são no retículo endoplasmático liso; o lisossomo é formado no retículo rugoso (inicialmente sob a forma de endossomo secundário).",
+                    "As enzimas no retículo endoplasmático rugoso; o lisossomo é formado no complexo de Golgi (inicialmente sob a forma de endossomo primário).",
+                    "As enzimas no nucléolo e o lisossomo é montado no retículo endoplasmático liso (inicialmente sob a forma de lisossomo pronto).",
+                    "As enzimas no retículo endoplasmático rugoso; o lisossomo é formado também no retículo liso (inicialmente na forma de lisossomo primário)."
+                ]
+            },
+            {
+                question: "A comunicação celular é importante para os tecidos e órgãos do corpo humano, se formem de modo ordenado e, após a estruturação do corpo, são necessários para coordenar o crescimento e o funcionamento das diferentes partes do organismo. Assinale a alternativa que indica, corretamente, os acontecimentos representados pelos números na figura.",
+                alternatives: [
+                    "4 = sinais proteicos produzidos pela célula que penetram no interior da célula receptora (3).",
+                    "5 = receptor lipídico que se liga ao sinal 2, pela célula 1.",
+                    "1 = célula sinalizadora que capturou o sinal do meio de um receptor de membrana plasmática.",
+                    "3 = célula receptora realizando a transdução de sinal (4).",
+                    "2 = sinais produzidos pela célula 1, que foram capturados pelo receptor (4) no interior da célula."
+                ]
+            },
+            {
+                question: "O número de células, nos animais, é regulado por uma combinação de programas intracelulares e extracelulares que controlam a sobrevivência do crescimento e a proliferação. Assinale a alternativa abaixo que indica o processo correto.",
+                alternatives: [
+                    "As proteínas quinases (CDKs) fazem parte do sistema de controle do ciclo celular e estão ativas em momentos específicos, enquanto as ciclinas estão sempre presentes.",
+                    "A ativação e desativação das proteínas quinases no momento apropriado no ciclo celular, são de responsabilidade de outro grupo de proteínas denominadas caspases.",
+                    "A necrose é um processo de morte celular caracterizada pelo rompimento da membrana plasmática e extravasamento de citoplasma para o meio extracelular, gerando inflamação.",
+                    "Apoptose é a morte celular que ocorre de forma aparentemente aleatória em células individuais no contexto de tecidos saudáveis, concomitante a acentuado processo inflamatório.",
+                    "A autofagia é um processo de morte celular programada no qual a célula ativa enzimas proteolíticas que degradam seus próprios componentes, levando à fragmentação do DNA e ao colapso da membrana plasmática."
+                ]
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+
+        function buildQuiz() {
+            quizData.forEach((data, index) => {
+                const questionBox = document.createElement('div');
+                questionBox.className = 'question-box';
+                questionBox.id = `q${index}`;
+
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+                questionText.textContent = `Questão ${index + 1}: ${data.question}`;
+                questionBox.appendChild(questionText);
+
+                data.alternatives.forEach((alternative, altIndex) => {
+                    const altDiv = document.createElement('div');
+                    altDiv.className = 'alternative';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question${index}`;
+                    input.value = altIndex;
+                    input.id = `q${index}a${altIndex}`;
+                    // Adiciona o evento de checagem imediata
+                    input.setAttribute('onclick', `checkAnswer(this, ${index})`);
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `q${index}a${altIndex}`);
+                    
+                    // Garantindo a letra e o texto da alternativa
+                    label.textContent = `${getLetter(altIndex)}) ${alternative}`;
+
+                    altDiv.appendChild(input);
+                    altDiv.appendChild(label);
+                    questionBox.appendChild(altDiv);
+                });
+
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback';
+                feedbackDiv.id = `feedback${index}`;
+                feedbackDiv.style.display = 'none'; // Inicia oculto
+                questionBox.appendChild(feedbackDiv);
+
+                quizContainer.appendChild(questionBox);
+            });
+        }
+
+        function checkAnswer(selectedElement, questionIndex) {
+            // Se já foi respondida, ignore o clique
+            if (answeredQuestions[questionIndex]) {
+                return;
+            }
+
+            const userAnswer = parseInt(selectedElement.value);
+            const correctAnswerIndex = correctAnswers[questionIndex];
+            const questionBox = document.getElementById(`q${questionIndex}`);
+            const feedbackDiv = document.getElementById(`feedback${questionIndex}`);
+            const correctLetter = getLetter(correctAnswerIndex);
+            const correctAnswerText = quizData[questionIndex].alternatives[correctAnswerIndex];
+
+            // 1. Desabilita as alternativas para a questão
+            const radios = document.getElementsByName(`question${questionIndex}`);
+            radios.forEach(radio => {
+                radio.disabled = true;
+            });
+            
+            // 2. Marca a questão como respondida
+            answeredQuestions[questionIndex] = true;
+
+            // 3. Fornece feedback imediato
+            feedbackDiv.style.display = 'block';
+            
+            if (userAnswer === correctAnswerIndex) {
+                score++;
+                feedbackDiv.textContent = `✅ Parabéns! Resposta correta.`;
+                feedbackDiv.className = 'feedback correct';
+                questionBox.style.borderColor = '#28a745';
+            } else {
+                feedbackDiv.textContent = `❌ Resposta incorreta. A correta é ${correctLetter}) ${correctAnswerText}`;
+                feedbackDiv.className = 'feedback incorrect';
+                questionBox.style.borderColor = '#dc3545';
+                
+                // 4. Destaca a alternativa correta
+                const correctLabel = document.querySelector(`#q${questionIndex}a${correctAnswerIndex}`).closest('.alternative');
+                if (correctLabel) {
+                    correctLabel.classList.add('is-correct');
+                }
+            }
+            
+            // Adiciona classe para marcar a questão como respondida e permitir estilos de gabarito
+            questionBox.classList.add('answered');
+
+            // Opcional: Rola para a próxima questão não respondida
+            let nextQuestionIndex = answeredQuestions.findIndex(answered => answered === false);
+            if (nextQuestionIndex !== -1) {
+                document.getElementById(`q${nextQuestionIndex}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function submitQuiz() {
+            const resultContainer = document.getElementById('result-container');
+            const totalAnswered = answeredQuestions.filter(a => a).length;
+            const incorrect = totalAnswered - score;
+            const notAnswered = totalQuestions - totalAnswered;
+            const percentage = ((score / totalQuestions) * 100).toFixed(1);
+
+            resultContainer.innerHTML = `
+                <h2>Resultado Final</h2>
+                <p>Total de Questões: ${totalQuestions}</p>
+                <p style="color: #28a745;">Acertos: ${score}</p>
+                <p style="color: #dc3545;">Erros: ${incorrect}</p>
+                <p style="color: #ffc107;">Não Respondidas: ${notAnswered}</p>
+                <p>Pontuação Final: **${percentage}%**</p>
+                <button onclick="window.location.reload()">Refazer Quiz</button>
+            `;
+            
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Constrói o quiz quando a página carrega
+        buildQuiz();
+    </script>
+
+</body>
+</html>
