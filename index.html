@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz: Morfofisiologia Celular</title>
+    <title>Seletor de Quiz: Morfofisiologia</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,6 +24,29 @@
             color: #007bff;
             text-align: center;
             margin-bottom: 30px;
+        }
+        .selection-box {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .selection-box button {
+            display: inline-block;
+            width: 45%;
+            margin: 10px;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .selection-box button:hover {
+            background-color: #0056b3;
+        }
+        .quiz-hidden {
+            display: none;
         }
         .question-box {
             margin-bottom: 25px;
@@ -52,7 +75,7 @@
         .alternative label:hover {
             background-color: #f0f0f0;
         }
-        button {
+        .submit-button {
             display: block;
             width: 100%;
             padding: 12px;
@@ -65,7 +88,7 @@
             transition: background-color 0.3s;
             margin-top: 30px;
         }
-        button:hover {
+        .submit-button:hover {
             background-color: #218838;
         }
         .feedback {
@@ -99,30 +122,29 @@
     <div class="container">
         <h1>Quiz de Morfofisiologia Celular, Tecidual e do Desenvolvimento</h1>
         
-        <div id="quiz-container">
+        <div id="selection-container">
+            <h2>Escolha a Prova que deseja fazer:</h2>
+            <div class="selection-box">
+                <button onclick="startQuiz('anterior')">Prova Anterior (Set 2023)</button>
+                <button onclick="startQuiz('atual')">Prova Atual (Jun 2021 - AV2)</button>
+            </div>
+        </div>
+        
+        <div id="quiz-full-container" class="quiz-hidden">
+            <h2 id="quiz-title"></h2>
+            <div id="quiz-container">
             </div>
 
-        <button onclick="submitQuiz()">Ver Resultado Final</button>
+            <button class="submit-button" onclick="submitQuiz()">Ver Resultado Final</button>
 
-        <div id="result-container">
+            <div id="result-container">
             </div>
+        </div>
     </div>
 
     <script>
-        // Gabarito baseado na análise das questões (0 = alternativa A, 1 = alternativa B, etc.)
-        const correctAnswers = [3, 3, 0, 4, 2, 1, 2, 4, 0, 0, 1, 0, 2, 3, 2];
-        const totalQuestions = correctAnswers.length;
-        
-        // Contadores globais
-        let score = 0;
-        let answeredQuestions = new Array(totalQuestions).fill(false); // Rastreia se a questão foi respondida
-
-        // Função auxiliar para converter índice (0, 1, 2...) em letra (a, b, c...)
-        function getLetter(index) {
-            return String.fromCharCode(65 + index); // 65 é o código ASCII para 'A'
-        }
-
-        const quizData = [
+        // --- DADOS DO QUIZ ANTERIOR (FORNECIDO PELO USUÁRIO) ---
+        const quizDataAnterior = [
             {
                 question: "Durante a respiração celular, os combustíveis biológicos são oxidados na presença de um aceptor de elétrons como o oxigênio na organela mitocôndria. A etapa da respiração celular em que há a maior produção de ATP ocorre na estrutura indicada por qual número no desenho a seguir:",
                 alternatives: [
@@ -274,11 +296,292 @@
                 ]
             }
         ];
+        // Respostas do quiz anterior (0 = A, 1 = B, 2 = C, 3 = D, 4 = E)
+        const correctAnswersAnterior = [3, 3, 0, 4, 2, 1, 2, 4, 0, 0, 1, 0, 2, 3, 2];
 
-        const quizContainer = document.getElementById('quiz-container');
+        // --- DADOS DO QUIZ ATUAL (AV2 - JUN 2021) - CORRIGIDOS ---
+        const quizDataAtual = [
+            {
+                question: "O processo de maturação eritrocitica... Na eritropoese, os reticulócitos são células intermediárias que sofrem um período inicial de maturação dentro da medula óssea e são então liberados ao sangue periférico onde se diferenciam em hemácias maduras. Em relação ao reticulócito, marque a alternativa que descreve suas características:",
+                alternatives: [
+                    "A. Anucleados, que participam da produção de glóbulos brancos.",
+                    "B. Anucleados, que participam da produção de glóbulos vermelhos.",
+                    "C. Nucleados, que participam da produção de glóbulos brancos.",
+                    "D. Nucleados, que participam da produção de glóbulos vermelhos."
+                ]
+            },
+            {
+                question: "O paciente apresenta: Glóbulos vermelhos (3,8-4,8x10⁶/mm³ -> 4 milhões/mm³); Glóbulos brancos (5.000-10.000/mm³ -> 9.000/mm³); Plaquetas (250.000-400.000/mm³ -> 200.000/mm³). Relacionando os sintomas (sangramento nasal e cansaço) apresentados pelo paciente com os resultados de seu hemograma, constata-se que:",
+                alternatives: [
+                    "A. O sangramento nasal é devido à baixa quantidade de plaquetas, que são responsáveis pela coagulação sanguínea.",
+                    "B. O cansaço ocorreu em função da quantidade de glóbulos brancos, que são responsáveis pela coagulação sanguínea.",
+                    "C. A dificuldade respiratória ocorreu pela quantidade de plaquetas, que são responsáveis pelo transporte de oxigênio no sangue.",
+                    "D. A dificuldade respiratória ocorreu perante a baixa quantidade de glóbulos vermelhos, que são responsáveis pela defesa imunológica."
+                ]
+            },
+            {
+                question: "A Lactulose é um dissacarídeo não absorvido pelo trato gastrintestinal, chegando ao cólon onde é fermentada por bactérias. Sobre o motivo para a não absorção da lactulose pelo intestino, podemos afirmar que:",
+                alternatives: [
+                    "A. Apresenta ligações alfa glicosídicas não digeríveis pelas nossas enzimas.",
+                    "B. Apresenta várias ligações beta glicosídicas que não serão hidrolisadas por enzimas intestinais.",
+                    "C. Apresenta uma ligação beta glicosídica que não é digerida por enzimas produzidas pelo nosso intestino.",
+                    "D. Apresenta ligações alfa glicosídicas na configuração trans que não podem ser processadas."
+                ]
+            },
+            {
+                question: "O transporte endógeno do triglicéride e do colesterol é feito por lipoproteínas de baixa densidade (VLDL e LDL), sendo esta produzida pelo fígado. Durante este transporte, observa-se:",
+                alternatives: [
+                    "A. Recolhimento do colesterol em excesso nos tecidos pelo LDL.",
+                    "B. Transferência da apoB48 e apo100 para o QM e VLDL.",
+                    "C. Retirada do LDL da corrente sanguínea feita pelas células do epitélio intestinal.",
+                    "D. A retirada de triglicérides das lipoproteínas feita pela enzima lipase lipoprotéica capilar."
+                ]
+            },
+            {
+                question: "A morte celular tem sido classificada em necrose e apoptose. Sobre as vias de morte celular, assinale a opção CORRETA:",
+                alternatives: [
+                    "A. O processo necrótico pode ocorrer aleatoriamente em tecidos saudáveis, com gasto de ATP e sem processo inflamatório.",
+                    "B. A necrose é a morte celular acompanhada de uma resposta inflamatória, resultante da perda da integridade da membrana plasmática e extravasamento de componentes celulares para o espaço extracelular.",
+                    "C. Apoptose é a morte celular que ocorre de forma aparentemente aleatória em células individuais no contexto de tecidos saudáveis, concomitante a acentuado processo inflamatório.",
+                    "D. A apoptose é um processo independente de gasto energético e frequentemente envolve a expressão alterada de genes-chave na regulação do ciclo celular."
+                ]
+            },
+            {
+                question: "As membranas fetais e placentas variam de acordo com a origem dos gêmeos. Portanto, é correto afirmar que:",
+                alternatives: [
+                    "A. Gêmeos monozigóticos compartilham as membranas fetais se a separação ocorrer durante a clivagem.",
+                    "B. Gêmeos monozigóticos não compartilham as membranas fetais se a separação ocorrer durante a clivagem.",
+                    "C. Gêmeos monozigóticos que são formados pela divisão do disco bilaminar não compartilham as membranas fetais.",
+                    "D. Gêmeos monozigóticos que são formados pela divisão da massa interna do blastocisto inicial não compartilham as membranas fetais."
+                ]
+            },
+            {
+                question: "Estatinas são inibidores competitivos da HMG-CoA redutase. Na presença de estatinas, observa-se um aumento no Km enzimático. Por esse motivo, podemos afirmar que as estatinas:",
+                alternatives: [
+                    "A. São fármacos que inibem a enzima competitivamente, diminuindo a sua afinidade pelo substrato.",
+                    "B. São fármacos que inibem a enzima competitivamente, já que a Vmax também aumenta na presença estatina.",
+                    "C. São fármacos que inibem a enzima de forma não competitiva, aumentando a sua afinidade pelo substrato.",
+                    "D. São fármacos que ativam a enzima de forma não competitiva, já que o Km aumenta na sua presença."
+                ]
+            },
+            {
+                question: "Os Gangliosidios participam da composição da membrana das hemácias, sendo o antígeno H o precursor. Sobre os gangliosidios, é correto afirmarmos que:",
+                alternatives: [
+                    "A. A capacidade de adicionar um monossacarídeo extra ao núcleo favorece a formação do antígeno O.",
+                    "B. O antígeno do tipo A apresenta um monossacarídeo a menos que os outros.",
+                    "C. O Tipo sanguíneo AB apresenta o antígeno A ou B na composição da membrana citoplasmática.",
+                    "D. A presença de um monossacarídeo a mais no núcleo transforma o antígeno O em A ou B."
+                ]
+            },
+            {
+                question: "Assinale a alternativa que contenha somente afirmações CORRETAS sobre a morfologia do núcleo durante a interfase: I. Membrana nuclear separa o conteúdo. II. Nucléolos representam todo o material genético. III. Cromossomos homólogos são os dois representantes de cada par. IV. Gene é um trecho de DNA com info para proteína.",
+                alternatives: [
+                    "A. I, IV apenas.",
+                    "B. II e III apenas.",
+                    "C. III e IV apenas.",
+                    "D. I e II apenas."
+                ]
+            },
+            {
+                question: "O ponto de checagem do fuso garante a correta ligação dos filamentos aos cromossomos. Em qual transição de fases ocorre esse ponto de checagem do fuso?",
+                alternatives: [
+                    "A. Da prófase para a metáfase da mitose.",
+                    "B. Da anáfase II para a telófase II da meiose.",
+                    "C. Da prófase I para a metáfase I da meiose.",
+                    "D. Da metáfase para a anáfase da mitose."
+                ]
+            },
+            {
+                question: "Quais alunos abaixo citados, fizeram as associações CORRETAS, sobre a divisão celular, numa célula com 2N=6? (Associações: João-Metáfase I, Célia-Anáfase I, Felipe-Anáfase II).",
+                alternatives: [
+                    "A. Apenas João e Célia",
+                    "B. Apenas Ana e Felipe",
+                    "C. Apenas João, Célia e Felipe",
+                    "D. Apenas Ana, João e Felipe"
+                ]
+            },
+            {
+                question: "Um fator que controla a afinidade da Hb pelo O2 é o 2,3-bifosfoglicerato (2,3-BPG). Sobre a atuação do 2,3-BPG na oxigenação dos tecidos, assinale a alternativa correta:",
+                alternatives: [
+                    "A. O sangue próximo aos pulmões é caracterizado por um aumento no pH (7,6) e, consequentemente, um aumento no efeito do 2,3-BPG.",
+                    "B. Observa-se uma diminuição na produção do 2,3-BPG em situações de adversidades, como altitudes e anemia.",
+                    "C. Devido a acidificação do sangue nos tecidos (pH 7,2), ocorre o aumento de cargas positivas da Hb que facilita a ligação do 2,3-BPG e a liberação de O2.",
+                    "D. A interação entre o 2,3-BPG depende das cargas negativas de aminoácidos ácidos existentes na hemoglobina."
+                ]
+            },
+            {
+                question: "A membrana placentária torna-se mais delgada com o avanço da gestação. Assinale alternativa que contém uma afirmação correta sobre a mesma:",
+                alternatives: [
+                    "A. À medida que a gestação avança, a membrana placentária torna-se mais delgada como demonstrada na imagem em B onde podemos observar apenas a presença do endotélio dos capilares fetais.",
+                    "B. Células sinciciotrofoblásticas finalmente desaparecem ao longo de grandes áreas das vilosidades, deixando apenas três camadas que são observadas na imagem A: citotrofoblasto, tecido conjuntivo das vilosidades e endotélio dos capilares fetais.",
+                    "C. Em algumas áreas a membrana placentária torna-se marcadamente mais fina e atenuada. Nesses sítios, imagem B, o citotrofoblasto entra em contato direto com o endotélio dos capilares fetais.",
+                    "D. A imagem representada em A demonstra a membrana placentária composta de quatro camadas: sinciciotrofoblasto, citotrofoblasto, tecido conjuntivo das vilosidades e endotélio dos capilares fetais."
+                ]
+            },
+            {
+                question: "O sangue humano é constituído por plasma e elementos figurados. Sobre os componentes do sangue, escolha a alternativa correta:",
+                alternatives: [
+                    "A. Os leucócitos são células anucleadas que atuam na defesa do organismo...",
+                    "B. O soro é obtido pela coleta, com anticoagulante...",
+                    "C. O plasma é responsável pelo transporte de nutrientes dos intestinos...",
+                    "D. A leucocitose representa uma diminuição no número de leucócitos..."
+                ]
+            },
+            {
+                question: "Considerando o ciclo celular de uma célula pouco diferenciada, podemos inferir que:",
+                alternatives: [
+                    "A. Durante a divisão celular o DNA está em plena atividade, formando o RNA...",
+                    "B. Eucromatina, heterocromatina e cromossomos... transcrevem normalmente.",
+                    "C. Durante todo o ciclo celular, os filamentos cromossômicos permanecem totalmente condensados.",
+                    "D. A interfase é o período em que não ocorre divisão celular e a célula permanece em alta atividade metabólica."
+                ]
+            },
+            {
+                question: "A hiperglicemia é importante para as complicações tardias do diabetes. Referente a hiperglicemia, analise as afirmativas abaixo e assinale a alternativa correta.",
+                alternatives: [
+                    "A. A hiperglicemia frequente possibilita a glicose associar-se ao grupo heme, impedindo a ligação do O2.",
+                    "B. A alta taxa de glicose sanguínea promove um aumento da afinidade da Hb pelo O2.",
+                    "C. A hiperglicemia aumenta a osmolaridade das hemácias, promovendo a lise das células vermelhas.",
+                    "D. A quantificação de HbA1c (hemoglobina glicada) fornece a informação da média glicêmica dos últimos meses."
+                ]
+            },
+            {
+                question: "Apesar do papel da vesícula vitelínica (saco vitelínico) não estar totalmente elucidado, existem algumas funções atribuídas para essa estrutura, **exceto**:",
+                alternatives: [
+                    "A. Armazenar nutrientes durante toda gravidez.",
+                    "B. Não contribui para o processo de formação do intestino primitivo embrionário.",
+                    "C. É desprovido de atividade hematopoiética, portanto, somente o fígado possui essa função.",
+                    "D. É o local de produção de células germinativas primordiais."
+                ]
+            },
+            {
+                question: "Considere as afirmações abaixo sobre o tecido conjuntivo adiposo em seres humanos: I. Armazenar triglicerídeos estimulado por nervos e hormônios. II. Tecido adiposo multilocular tem aspecto amarelo. III. Crianças recém-nascidas são protegidas do frio pela presença de tecido adiposo multilocular, rico em mitocondrias. Qual(is) é(são) correta(s)?",
+                alternatives: [
+                    "A. Apenas I e III.",
+                    "B. Apenas I e II.",
+                    "C. Apenas II.",
+                    "D. Apenas I."
+                ]
+            },
+            {
+                question: "Com auxílio da figura do núcleo, a estrutura marcada com o II (Nucléolo), assinale a opção CORRETA, acerca das estruturas celulares.",
+                alternatives: [
+                    "A. A figura mostra uma estrutura celular, o núcleo, que contém uma subestrutura membranosa envolvida no armazenamento de cálcio, função semelhante à do retículo endoplasmático.",
+                    "B. Na figura, a região assinalada como I corresponde à forma inativa da cromatina...",
+                    "C. A estrutura ilustrada na figura é envolvida por duas unidades de membrana, sendo que o espaço existente entre as membranas é contínuo com a luz das cisternas do complexo de Golgi.",
+                    "D. A estrutura marcada com o II, é o local onde as subunidades ribossômicas em formação se encontram localizadas."
+                ]
+            },
+            {
+                question: "As enzimas digestivas especializadas e proteínas de membrana dos lisossomos são sintetizadas no RE e transportadas pelo CG. Assinale a alternativa que contenha somente afirmações CORRETAS: I. No RE as enzimas lisossômicas são etiquetadas com Manose-6-fosfato. II. As enzimas lisossômicas na face trans do CG são reconhecidas pelo receptor Manose-6-fosfato. III. As enzimas são liberadas na face trans do CG em endossomos iniciais com pH 6.0. IV. Após reciclarem receptores e baixarem o pH para 4.5 se tornam endossomos tardios.",
+                alternatives: [
+                    "A. Todas alternativas estão corretas",
+                    "B. Apenas a I e III estão corretas",
+                    "C. Apenas a I, II e III estão corretas",
+                    "D. Apenas a II e IV estão corretas"
+                ]
+            },
+            {
+                question: "A massa muscular é composta por diferentes tipos de fibras (vermelhas - I e brancas - IIb). Assinale a alternativa correta sobre as fibras musculares:",
+                alternatives: [
+                    "A. Fibras brancas são responsáveis pela contração rápida e apresentam grande aporte de oxigênio.",
+                    "B. Fibras do tipo I são responsáveis pelo exercício duradouro e usam diferentes tipos de combustíveis energéticos.",
+                    "C. Fibras vermelhas são responsáveis pela contração lenta e produzem energia exclusivamente a partir do glicogênio.",
+                    "D. Fibras intermediárias são estritamente anaeróbicas e pode usar vários tipos de combustíveis."
+                ]
+            },
+            {
+                question: "Assinale a opção CORRETA a respeito dos processos de Transdução de Sinal e Metabolismo Energético:",
+                alternatives: [
+                    "A. Nos receptores tirosina quinase, muitas vezes, a ligação de uma molécula sinal faz com que dois receptores se reúnam na membrana, formando um dímero.",
+                    "B. Os receptores de superfície celular, podem ou não se ligar a uma molécula sinal extracelular, realizando, assim, a transdução da sua mensagem a moléculas de sinalização intracelular.",
+                    "C. Os hormônios esteróides atravessam a membrana plasmática das células alvo e se ligam a receptores localizados no citosol ou no núcleo.",
+                    "D. Os receptores acoplados à proteína G se comportam como interruptores moleculares ativando ou inibindo uma enzima, ou um canal iônico na membrana plasmática iniciando uma cascata de sinalização intracelular."
+                ]
+            },
+            {
+                question: "Assinale a opção CORRETA a respeito do Metabolismo Energético:",
+                alternatives: [
+                    "A. O NADH e o FADH2, passam seus elétrons de alta energia a uma cadeia transportadora de elétrons, essa série de reações ocorrem na membrana mitocondrial interna.",
+                    "B. As reações da glicólise degradam a glicose, em duas moléculas de piruvato, produzindo uma quantidade relativamente pequena de ATP e NADH, que ocorrem na matriz mitocondrial."
+                ]
+            },
+            {
+                question: "A deficiência de vitamina K é rara, mas pode ser observada em indivíduos com abetalipoproteinemia ou quando submetido a uma terapia antibiótica contínua. Sobre essa deficiência de vitamina K, podemos afirmar que:",
+                alternatives: [
+                    "A. A sua disponibilidade estar diminuída devido a mesma não ser digerida e nem e absorvida mais pelo epitélio intestinal.",
+                    "B. A vitamina K não será absorvida pelo epitélio intestinal por falta de betalipoproteina e as bactérias intestinais passarão a produzir principalmente biotina.",
+                    "C. Acontece devido à mesma ter estrutura lipídica e boa parte dela ser produzida por micro-organismos da microbiota intestinal.",
+                    "D. A vitamina K formará complexo com o antibiótico impedindo a sua absorção e a mesma será eliminada pelas fezes."
+                ]
+            },
+            {
+                question: "O embrião, suspenso no líquido amniótico pelo cordão umbilical, flutua livremente. Dessa forma, qual sequência de V (Verdadeiro) ou F (Falso) está correta: 1. Permite o crescimento simetrico do embrião/feto. 2. Possibilita os movimentos fetais. 3. Auxilia nas trocas gasosas entre o embrião e a mãe. 4. Evita a aderência do embrião aos tecidos circunjacentes.",
+                alternatives: [
+                    "A. F, V, F e V.",
+                    "B. F, F, V e V.",
+                    "C. V, F, V e F.",
+                    "D. V, V, F e V."
+                ]
+            },
+            {
+                question: "A enzima fosfocreatina quinase (CPK) atua principalmente no tecido muscular e no cérebro. Sobre a função dessa enzima, podemos afirmar que:",
+                alternatives: [
+                    "A. Esta enzima está inativada durante a atividade de contração muscular",
+                    "B. Relaciona-se com a transformação de creatina em fosfocreatina durante o repouso muscular",
+                    "C. Está envolvida com a produção de ATP pelo processo aeróbico",
+                    "D. Transfere o fosfato da fosfocreatina para o ADP quando o indivíduo estiver em repouso"
+                ]
+            }
+        ];
+        // Respostas do quiz atual (0 = A, 1 = B, 2 = C, 3 = D)
+        const correctAnswersAtual = [1, 0, 2, 3, 1, 1, 0, 3, 2, 3, 2, 2, 3, 2, 3, 3, 2, 0, 3, 0, 1, 0, 0, 2, 3, 1];
+
+        // --- VARIÁVEIS GLOBAIS DE CONTROLE ---
+        let currentQuizData = [];
+        let currentCorrectAnswers = [];
+        let totalQuestions = 0;
+        let score = 0;
+        let answeredQuestions = [];
+
+        // --- FUNÇÕES DE CONTROLE ---
+
+        // Função auxiliar para converter índice (0, 1, 2...) em letra (a, b, c...)
+        function getLetter(index) {
+            return String.fromCharCode(65 + index); // 65 é o código ASCII para 'A'
+        }
+
+        // Inicia o quiz com o conjunto de dados selecionado
+        function startQuiz(quizType) {
+            const selectionContainer = document.getElementById('selection-container');
+            const quizFullContainer = document.getElementById('quiz-full-container');
+            const quizTitle = document.getElementById('quiz-title');
+
+            if (quizType === 'anterior') {
+                currentQuizData = quizDataAnterior;
+                currentCorrectAnswers = correctAnswersAnterior;
+                quizTitle.textContent = "Quiz: Prova Anterior (Set 2023)";
+            } else if (quizType === 'atual') {
+                currentQuizData = quizDataAtual;
+                currentCorrectAnswers = correctAnswersAtual;
+                quizTitle.textContent = "Quiz: Prova Atual (Jun 2021 - AV2)";
+            }
+
+            totalQuestions = currentQuizData.length;
+            answeredQuestions = new Array(totalQuestions).fill(false);
+            score = 0;
+
+            selectionContainer.classList.add('quiz-hidden');
+            quizFullContainer.classList.remove('quiz-hidden');
+
+            buildQuiz();
+        }
 
         function buildQuiz() {
-            quizData.forEach((data, index) => {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = ''; // Limpa o container
+
+            currentQuizData.forEach((data, index) => {
                 const questionBox = document.createElement('div');
                 questionBox.className = 'question-box';
                 questionBox.id = `q${index}`;
@@ -303,8 +606,12 @@
                     const label = document.createElement('label');
                     label.setAttribute('for', `q${index}a${altIndex}`);
                     
-                    // Garantindo a letra e o texto da alternativa
-                    label.textContent = `${getLetter(altIndex)}) ${alternative}`;
+                    // Limpa A), B), C) ou D) se a alternativa já começar com a letra correta (para o quiz atual)
+                    const altText = alternative.startsWith(getLetter(altIndex) + '.') || alternative.startsWith(getLetter(altIndex) + ' ') 
+                        ? alternative.substring(2).trim() 
+                        : alternative;
+                    
+                    label.textContent = `${getLetter(altIndex)}) ${altText}`;
 
                     altDiv.appendChild(input);
                     altDiv.appendChild(label);
@@ -328,11 +635,18 @@
             }
 
             const userAnswer = parseInt(selectedElement.value);
-            const correctAnswerIndex = correctAnswers[questionIndex];
+            const correctAnswerIndex = currentCorrectAnswers[questionIndex];
             const questionBox = document.getElementById(`q${questionIndex}`);
             const feedbackDiv = document.getElementById(`feedback${questionIndex}`);
             const correctLetter = getLetter(correctAnswerIndex);
-            const correctAnswerText = quizData[questionIndex].alternatives[correctAnswerIndex];
+            
+            // Pega o texto da alternativa correta para o feedback
+            let correctAnswerText = currentQuizData[questionIndex].alternatives[correctAnswerIndex];
+            
+            // Limpa A), B), C) ou D) se a alternativa correta já for formatada (para o quiz atual)
+            if (correctAnswerText.startsWith(correctLetter + '.') || correctAnswerText.startsWith(correctLetter + ' ')) {
+                correctAnswerText = correctAnswerText.substring(2).trim();
+            }
 
             // 1. Desabilita as alternativas para a questão
             const radios = document.getElementsByName(`question${questionIndex}`);
@@ -387,14 +701,12 @@
                 <p style="color: #dc3545;">Erros: ${incorrect}</p>
                 <p style="color: #ffc107;">Não Respondidas: ${notAnswered}</p>
                 <p>Pontuação Final: **${percentage}%**</p>
-                <button onclick="window.location.reload()">Refazer Quiz</button>
+                <button class="submit-button" onclick="window.location.reload()">Escolher Outra Prova/Refazer Quiz</button>
             `;
             
+            resultContainer.style.display = 'block';
             resultContainer.scrollIntoView({ behavior: 'smooth' });
         }
-
-        // Constrói o quiz quando a página carrega
-        buildQuiz();
     </script>
 
 </body>
